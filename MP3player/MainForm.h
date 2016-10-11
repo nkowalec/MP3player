@@ -88,7 +88,11 @@ namespace MP3player {
 			// 
 			this->nameBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left)
 				| System::Windows::Forms::AnchorStyles::Right));
+			this->nameBox->BackColor = System::Drawing::Color::White;
+			this->nameBox->Cursor = System::Windows::Forms::Cursors::Default;
 			this->nameBox->Enabled = false;
+			this->nameBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(238)));
 			this->nameBox->Location = System::Drawing::Point(0, 27);
 			this->nameBox->Name = L"nameBox";
 			this->nameBox->Size = System::Drawing::Size(339, 20);
@@ -181,14 +185,19 @@ namespace MP3player {
 			// 
 			// trackBar1
 			// 
+			this->trackBar1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
 			this->trackBar1->Location = System::Drawing::Point(0, 49);
 			this->trackBar1->Maximum = 100;
 			this->trackBar1->Name = L"trackBar1";
 			this->trackBar1->Size = System::Drawing::Size(339, 45);
 			this->trackBar1->TabIndex = 5;
+			this->trackBar1->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &MainForm::trackBar1_MouseDown);
+			this->trackBar1->MouseUp += gcnew System::Windows::Forms::MouseEventHandler(this, &MainForm::trackBar1_MouseUp);
 			// 
 			// playPauseBtn
 			// 
+			this->playPauseBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
 			this->playPauseBtn->Location = System::Drawing::Point(87, 83);
 			this->playPauseBtn->Name = L"playPauseBtn";
 			this->playPauseBtn->Size = System::Drawing::Size(70, 23);
@@ -199,6 +208,7 @@ namespace MP3player {
 			// 
 			// stopBtn
 			// 
+			this->stopBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
 			this->stopBtn->Location = System::Drawing::Point(163, 83);
 			this->stopBtn->Name = L"stopBtn";
 			this->stopBtn->Size = System::Drawing::Size(70, 23);
@@ -247,5 +257,8 @@ namespace MP3player {
 	private: System::Void Timer_Tick(System::Object^ sender, System::EventArgs^ e);
 	private: System::Void playPauseBtn_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void stopBtn_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void trackBar1_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
+	private: System::Void trackBar1_MouseUp(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
+	private: array<String^>^ plikiZKatalogu(String^ path);
 };
 }

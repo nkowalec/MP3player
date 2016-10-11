@@ -30,10 +30,30 @@ System::Void MP3player::MainForm::nazwyDoListy(array<String^>^ elementy)
 
 System::Void MP3player::MainForm::listView_DragDrop(System::Object ^ sender, System::Windows::Forms::DragEventArgs ^ e)
 {
-	array<String^>^ files = (array<String^>^)e->Data->GetData(DataFormats::FileDrop);
-	nazwyDoListy(files);
+	array<String^>^ paths = (array<String^>^)e->Data->GetData(DataFormats::FileDrop);
+	System::Collections::Generic::List<String^>^ lista = gcnew System::Collections::Generic::List<String^>();
+	
+	for each (String^ path in paths)
+	{
+		FileAttributes^ attr = File::GetAttributes(path);
+		
+		if (!attr->HasFlag(FileAttributes::Directory))
+			lista->Add(path);
 
-	delete files;
+		if (attr->HasFlag(FileAttributes::Directory))
+		{
+			for each (String^ item in plikiZKatalogu(path))
+			{
+				attr = File::GetAttributes(item);
+				if (!attr->HasFlag(FileAttributes::Directory) && item->EndsWith(".mp3"))
+					lista->Add(item);
+			}
+		}
+	}
+
+	nazwyDoListy(lista->ToArray());
+
+	delete lista;
 }
 
 System::Void MP3player::MainForm::MainForm_DragDrop(System::Object ^ sender, System::Windows::Forms::DragEventArgs ^ e)
@@ -116,4 +136,23 @@ System::Void MP3player::MainForm::stopBtn_Click(System::Object ^ sender, System:
 	trackBar1->Value = 0;
 }
 
+System::Void MP3player::MainForm::trackBar1_MouseDown(System::Object ^ sender, System::Windows::Forms::MouseEventArgs ^ e)
+{
+	timer->Stop();
+}
+
+System::Void MP3player::MainForm::trackBar1_MouseUp(System::Object ^ sender, System::Windows::Forms::MouseEventArgs ^ e)
+{
+	double percent = (double)trackBar1->Value / trackBar1->Maximum;
+	player->controls->currentPosition = percent * player->controls->currentItem->duration;
+
+	timer->Start();
+}
+
+array<String^>^ MP3player::MainForm::plikiZKatalogu(String ^ path)
+{
+	array<String^>^ files = Directory::GetFiles(path);
+	return files;
+	// TODO: insert return statement here
+}
 
