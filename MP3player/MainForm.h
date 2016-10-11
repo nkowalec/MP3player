@@ -65,11 +65,11 @@ namespace MP3player {
 			this->menuStrip1 = (gcnew System::Windows::Forms::MenuStrip());
 			this->plikToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->otwórzToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->wyjœcieToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->pomocToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->listView = (gcnew System::Windows::Forms::ListView());
 			this->Nazwa = (gcnew System::Windows::Forms::ColumnHeader());
 			this->Czas = (gcnew System::Windows::Forms::ColumnHeader());
-			this->wyjœcieToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->menuStrip1->SuspendLayout();
 			this->SuspendLayout();
 			// 
@@ -125,6 +125,13 @@ namespace MP3player {
 			this->otwórzToolStripMenuItem->Text = L"Otwórz..";
 			this->otwórzToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::otworzToolStripMenuItem_Click);
 			// 
+			// wyjœcieToolStripMenuItem
+			// 
+			this->wyjœcieToolStripMenuItem->Name = L"wyjœcieToolStripMenuItem";
+			this->wyjœcieToolStripMenuItem->Size = System::Drawing::Size(152, 22);
+			this->wyjœcieToolStripMenuItem->Text = L"Wyjœcie";
+			this->wyjœcieToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::wyjœcieToolStripMenuItem_Click);
+			// 
 			// pomocToolStripMenuItem
 			// 
 			this->pomocToolStripMenuItem->Name = L"pomocToolStripMenuItem";
@@ -148,24 +155,18 @@ namespace MP3player {
 			this->listView->View = System::Windows::Forms::View::Details;
 			this->listView->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &MainForm::listView_DragDrop);
 			this->listView->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &MainForm::listView_DragEnter);
+			this->listView->DoubleClick += gcnew System::EventHandler(this, &MainForm::listView_DoubleClick);
 			this->listView->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &MainForm::listView_KeyUp);
 			// 
 			// Nazwa
 			// 
 			this->Nazwa->Text = L"Nazwa";
-			this->Nazwa->Width = 108;
+			this->Nazwa->Width = 220;
 			// 
 			// Czas
 			// 
 			this->Czas->Text = L"Czas";
 			this->Czas->Width = 99;
-			// 
-			// wyjœcieToolStripMenuItem
-			// 
-			this->wyjœcieToolStripMenuItem->Name = L"wyjœcieToolStripMenuItem";
-			this->wyjœcieToolStripMenuItem->Size = System::Drawing::Size(152, 22);
-			this->wyjœcieToolStripMenuItem->Text = L"Wyjœcie";
-			this->wyjœcieToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::wyjœcieToolStripMenuItem_Click);
 			// 
 			// MainForm
 			// 
@@ -197,5 +198,6 @@ namespace MP3player {
 	private: System::Void listView_DragEnter(System::Object^  sender, System::Windows::Forms::DragEventArgs^  e);
 	private: System::Void listView_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e);
 	private: System::Void wyjœcieToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void listView_DoubleClick(System::Object^  sender, System::EventArgs^  e);
 };
 }

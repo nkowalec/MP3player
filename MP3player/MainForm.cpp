@@ -3,6 +3,7 @@
 using namespace System;
 using namespace System::Windows::Forms;
 using namespace System::Media;
+using namespace System::IO;
 
 System::Void MP3player::MainForm::otworzToolStripMenuItem_Click(System::Object ^ sender, System::EventArgs ^ e)
 {
@@ -20,8 +21,9 @@ System::Void MP3player::MainForm::nazwyDoListy(array<String^>^ elementy)
 {
 	for each (String^ item in elementy)
 	{
-		ListViewItem^ listItem = gcnew ListViewItem(item);
+		ListViewItem^ listItem = gcnew ListViewItem(Path::GetFileName(item));
 		listView->Items->Add(listItem);
+		listItem->Name = item;
 	}
 	listView->Refresh();
 }
@@ -63,6 +65,12 @@ System::Void MP3player::MainForm::listView_KeyUp(System::Object ^ sender, System
 System::Void MP3player::MainForm::wyjœcieToolStripMenuItem_Click(System::Object ^ sender, System::EventArgs ^ e)
 {
 	Application::Exit();
+}
+
+System::Void MP3player::MainForm::listView_DoubleClick(System::Object ^ sender, System::EventArgs ^ e)
+{
+	nameBox->Text = Path::GetFileName(listView->SelectedItems[0]->Text);
+	String^ filePath = listView->SelectedItems[0]->Name;
 }
 
 
