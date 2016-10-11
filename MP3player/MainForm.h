@@ -21,6 +21,10 @@ namespace MP3player {
 			//
 			//TODO: Add the constructor code here
 			//
+
+			player = gcnew WMPLib::WindowsMediaPlayerClass();
+			timer = gcnew Timer();
+			timer->Tick += gcnew EventHandler(this, &MainForm::Timer_Tick);
 		}
 
 	protected:
@@ -36,7 +40,7 @@ namespace MP3player {
 		}
 	private: System::Windows::Forms::TextBox^  nameBox;
 	protected:
-
+	private: Timer^ timer;
 	private: System::Windows::Forms::Label^  label1;
 	private: System::Windows::Forms::MenuStrip^  menuStrip1;
 	private: System::Windows::Forms::ToolStripMenuItem^  plikToolStripMenuItem;
@@ -46,6 +50,9 @@ namespace MP3player {
 	private: System::Windows::Forms::ColumnHeader^  Nazwa;
 	private: System::Windows::Forms::ColumnHeader^  Czas;
 	private: System::Windows::Forms::ToolStripMenuItem^  wyjœcieToolStripMenuItem;
+	private: System::Windows::Forms::TrackBar^  trackBar1;
+	private: System::Windows::Forms::Button^  playPauseBtn;
+	private: System::Windows::Forms::Button^  stopBtn;
 
 	private:
 		/// <summary>
@@ -70,7 +77,11 @@ namespace MP3player {
 			this->listView = (gcnew System::Windows::Forms::ListView());
 			this->Nazwa = (gcnew System::Windows::Forms::ColumnHeader());
 			this->Czas = (gcnew System::Windows::Forms::ColumnHeader());
+			this->trackBar1 = (gcnew System::Windows::Forms::TrackBar());
+			this->playPauseBtn = (gcnew System::Windows::Forms::Button());
+			this->stopBtn = (gcnew System::Windows::Forms::Button());
 			this->menuStrip1->SuspendLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->trackBar1))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// nameBox
@@ -88,7 +99,7 @@ namespace MP3player {
 			this->label1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
 				| System::Windows::Forms::AnchorStyles::Left));
 			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(0, 58);
+			this->label1->Location = System::Drawing::Point(1, 111);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(48, 13);
 			this->label1->TabIndex = 2;
@@ -121,14 +132,14 @@ namespace MP3player {
 			// otwórzToolStripMenuItem
 			// 
 			this->otwórzToolStripMenuItem->Name = L"otwórzToolStripMenuItem";
-			this->otwórzToolStripMenuItem->Size = System::Drawing::Size(152, 22);
+			this->otwórzToolStripMenuItem->Size = System::Drawing::Size(118, 22);
 			this->otwórzToolStripMenuItem->Text = L"Otwórz..";
 			this->otwórzToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::otworzToolStripMenuItem_Click);
 			// 
 			// wyjœcieToolStripMenuItem
 			// 
 			this->wyjœcieToolStripMenuItem->Name = L"wyjœcieToolStripMenuItem";
-			this->wyjœcieToolStripMenuItem->Size = System::Drawing::Size(152, 22);
+			this->wyjœcieToolStripMenuItem->Size = System::Drawing::Size(118, 22);
 			this->wyjœcieToolStripMenuItem->Text = L"Wyjœcie";
 			this->wyjœcieToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::wyjœcieToolStripMenuItem_Click);
 			// 
@@ -147,9 +158,9 @@ namespace MP3player {
 			this->listView->Columns->AddRange(gcnew cli::array< System::Windows::Forms::ColumnHeader^  >(2) { this->Nazwa, this->Czas });
 			this->listView->FullRowSelect = true;
 			this->listView->HeaderStyle = System::Windows::Forms::ColumnHeaderStyle::Nonclickable;
-			this->listView->Location = System::Drawing::Point(0, 75);
+			this->listView->Location = System::Drawing::Point(0, 126);
 			this->listView->Name = L"listView";
-			this->listView->Size = System::Drawing::Size(339, 368);
+			this->listView->Size = System::Drawing::Size(339, 317);
 			this->listView->TabIndex = 4;
 			this->listView->UseCompatibleStateImageBehavior = false;
 			this->listView->View = System::Windows::Forms::View::Details;
@@ -168,12 +179,43 @@ namespace MP3player {
 			this->Czas->Text = L"Czas";
 			this->Czas->Width = 99;
 			// 
+			// trackBar1
+			// 
+			this->trackBar1->Location = System::Drawing::Point(0, 49);
+			this->trackBar1->Maximum = 100;
+			this->trackBar1->Name = L"trackBar1";
+			this->trackBar1->Size = System::Drawing::Size(339, 45);
+			this->trackBar1->TabIndex = 5;
+			// 
+			// playPauseBtn
+			// 
+			this->playPauseBtn->Location = System::Drawing::Point(87, 83);
+			this->playPauseBtn->Name = L"playPauseBtn";
+			this->playPauseBtn->Size = System::Drawing::Size(70, 23);
+			this->playPauseBtn->TabIndex = 6;
+			this->playPauseBtn->Text = L"Play";
+			this->playPauseBtn->UseVisualStyleBackColor = true;
+			this->playPauseBtn->Click += gcnew System::EventHandler(this, &MainForm::playPauseBtn_Click);
+			// 
+			// stopBtn
+			// 
+			this->stopBtn->Location = System::Drawing::Point(163, 83);
+			this->stopBtn->Name = L"stopBtn";
+			this->stopBtn->Size = System::Drawing::Size(70, 23);
+			this->stopBtn->TabIndex = 7;
+			this->stopBtn->Text = L"Stop";
+			this->stopBtn->UseVisualStyleBackColor = true;
+			this->stopBtn->Click += gcnew System::EventHandler(this, &MainForm::stopBtn_Click);
+			// 
 			// MainForm
 			// 
 			this->AllowDrop = true;
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(339, 442);
+			this->Controls->Add(this->stopBtn);
+			this->Controls->Add(this->playPauseBtn);
+			this->Controls->Add(this->trackBar1);
 			this->Controls->Add(this->listView);
 			this->Controls->Add(this->label1);
 			this->Controls->Add(this->nameBox);
@@ -185,6 +227,7 @@ namespace MP3player {
 			this->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &MainForm::MainForm_DragDrop);
 			this->menuStrip1->ResumeLayout(false);
 			this->menuStrip1->PerformLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->trackBar1))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -199,5 +242,10 @@ namespace MP3player {
 	private: System::Void listView_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e);
 	private: System::Void wyjœcieToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void listView_DoubleClick(System::Object^  sender, System::EventArgs^  e);
+
+	private: WMPLib::WindowsMediaPlayerClass^ player;
+	private: System::Void Timer_Tick(System::Object^ sender, System::EventArgs^ e);
+	private: System::Void playPauseBtn_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void stopBtn_Click(System::Object^  sender, System::EventArgs^  e);
 };
 }
