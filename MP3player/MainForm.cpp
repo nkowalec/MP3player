@@ -5,6 +5,8 @@ using namespace System::Windows::Forms;
 using namespace System::Media;
 using namespace System::IO;
 
+bool timerFlag = false;
+
 System::Void MP3player::MainForm::otworzToolStripMenuItem_Click(System::Object ^ sender, System::EventArgs ^ e)
 {
 	OpenFileDialog^ opendialog = gcnew OpenFileDialog;
@@ -95,10 +97,11 @@ System::Void MP3player::MainForm::listView_DoubleClick(System::Object ^ sender, 
 {
 	nameBox->Text = Path::GetFileName(listView->SelectedItems[0]->Text);
 	String^ filePath = listView->SelectedItems[0]->Name;
-
+	CurrentItem = listView->SelectedItems[0];
+	
 	player->URL = filePath;
-	timer->Start();
-	player->controls->play();
+	if(!timerFlag) { timer->Start(); timerFlag = true; }
+	player->play();
 	playPauseBtn->Text = "Pause";
 }
 
@@ -106,8 +109,16 @@ System::Void MP3player::MainForm::Timer_Tick(System::Object ^ sender, System::Ev
 {
 	double percent = 0;
 	
+	if (playFlag)
+	{		
+		player->controls->play();
+		playFlag = false;
+	}
+
 	if (player->controls->currentPosition > 0 && player->controls->currentItem->duration > 0)
 	{
+		currTime->Text = player->controls->currentPositionString;
+		fullTime->Text = player->currentItem->durationString;
 		percent = ((double)player->controls->currentPosition / player->controls->currentItem->duration);
 
 		trackBar1->Value = (int)(percent * trackBar1->Maximum);
@@ -120,6 +131,7 @@ System::Void MP3player::MainForm::playPauseBtn_Click(System::Object ^ sender, Sy
 	{
 		playPauseBtn->Text = "Pause";
 		player->controls->play();
+		if(!timerFlag) { timer->Start(); timerFlag = true; }
 	}
 	else
 	{
@@ -132,13 +144,16 @@ System::Void MP3player::MainForm::stopBtn_Click(System::Object ^ sender, System:
 {
 	playPauseBtn->Text = "Play";
 	timer->Stop();
+	timerFlag = false;
 	player->controls->stop();
 	trackBar1->Value = 0;
+	currTime->Text = "00:00";
 }
 
 System::Void MP3player::MainForm::trackBar1_MouseDown(System::Object ^ sender, System::Windows::Forms::MouseEventArgs ^ e)
 {
 	timer->Stop();
+	timerFlag = false;
 }
 
 System::Void MP3player::MainForm::trackBar1_MouseUp(System::Object ^ sender, System::Windows::Forms::MouseEventArgs ^ e)
@@ -146,13 +161,72 @@ System::Void MP3player::MainForm::trackBar1_MouseUp(System::Object ^ sender, Sys
 	double percent = (double)trackBar1->Value / trackBar1->Maximum;
 	player->controls->currentPosition = percent * player->controls->currentItem->duration;
 
-	timer->Start();
+	if(!timerFlag) { timer->Start(); timerFlag = true; }
 }
 
 array<String^>^ MP3player::MainForm::plikiZKatalogu(String ^ path)
 {
 	array<String^>^ files = Directory::GetFiles(path);
 	return files;
-	// TODO: insert return statement here
 }
 
+void MP3player::MainForm::OnPlayStateChange(int NewState)
+{
+	if (NewState == (int)WMPLib::WMPPlayState::wmppsMediaEnded)
+	{
+		//Nastêpny utwór..
+		NextSong();
+		playFlag = true;
+	}
+}
+
+void MP3player::MainForm::NextSong()
+{
+	int nextIndex = CurrentItem->Index + 1;
+	if (listView->Items->Count - 1 >= nextIndex)
+	{
+		for each (ListViewItem^ item in listView->SelectedItems)
+		{
+			item->Selected = false;
+		}
+
+		listView->Items[nextIndex]->Selected = true;
+		listView->Focus();
+		listView_KeyUp(this, %KeyEventArgs::KeyEventArgs(Keys::Enter));
+	}
+	else
+	{
+		stopBtn_Click(this, EventArgs::Empty);
+	}
+}
+
+void MP3player::MainForm::PrevSong()
+{
+	int prevIndex = CurrentItem->Index - 1;
+	if (prevIndex >= 0 && listView->Items->Count >= prevIndex)
+	{
+		for each (ListViewItem^ item in listView->SelectedItems)
+		{
+			item->Selected = false;
+		}
+
+		listView->Items[prevIndex]->Selected = true;
+		
+		listView->Focus();
+		listView_KeyUp(this, %KeyEventArgs::KeyEventArgs(Keys::Enter));
+	}
+	else
+	{
+		stopBtn_Click(this, EventArgs::Empty);
+	}
+}
+
+System::Void MP3player::MainForm::nextBtn_Click(System::Object ^ sender, System::EventArgs ^ e)
+{
+	NextSong();
+}
+
+System::Void MP3player::MainForm::prevBtn_Click(System::Object ^ sender, System::EventArgs ^ e)
+{
+	PrevSong();
+}

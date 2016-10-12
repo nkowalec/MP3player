@@ -23,6 +23,8 @@ namespace MP3player {
 			//
 
 			player = gcnew WMPLib::WindowsMediaPlayerClass();
+			player->PlayStateChange += gcnew WMPLib::_WMPOCXEvents_PlayStateChangeEventHandler(this, &MP3player::MainForm::OnPlayStateChange);
+			
 			timer = gcnew Timer();
 			timer->Tick += gcnew EventHandler(this, &MainForm::Timer_Tick);
 		}
@@ -53,6 +55,11 @@ namespace MP3player {
 	private: System::Windows::Forms::TrackBar^  trackBar1;
 	private: System::Windows::Forms::Button^  playPauseBtn;
 	private: System::Windows::Forms::Button^  stopBtn;
+	private: System::Windows::Forms::Label^  currTime;
+	private: System::Windows::Forms::Label^  label3;
+	private: System::Windows::Forms::Label^  fullTime;
+	private: System::Windows::Forms::Button^  nextBtn;
+	private: System::Windows::Forms::Button^  prevBtn;
 
 	private:
 		/// <summary>
@@ -80,6 +87,11 @@ namespace MP3player {
 			this->trackBar1 = (gcnew System::Windows::Forms::TrackBar());
 			this->playPauseBtn = (gcnew System::Windows::Forms::Button());
 			this->stopBtn = (gcnew System::Windows::Forms::Button());
+			this->currTime = (gcnew System::Windows::Forms::Label());
+			this->label3 = (gcnew System::Windows::Forms::Label());
+			this->fullTime = (gcnew System::Windows::Forms::Label());
+			this->nextBtn = (gcnew System::Windows::Forms::Button());
+			this->prevBtn = (gcnew System::Windows::Forms::Button());
 			this->menuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->trackBar1))->BeginInit();
 			this->SuspendLayout();
@@ -217,12 +229,66 @@ namespace MP3player {
 			this->stopBtn->UseVisualStyleBackColor = true;
 			this->stopBtn->Click += gcnew System::EventHandler(this, &MainForm::stopBtn_Click);
 			// 
+			// currTime
+			// 
+			this->currTime->AutoSize = true;
+			this->currTime->Location = System::Drawing::Point(4, 83);
+			this->currTime->Name = L"currTime";
+			this->currTime->Size = System::Drawing::Size(34, 13);
+			this->currTime->TabIndex = 8;
+			this->currTime->Text = L"00:00";
+			// 
+			// label3
+			// 
+			this->label3->AutoSize = true;
+			this->label3->Location = System::Drawing::Point(35, 83);
+			this->label3->Name = L"label3";
+			this->label3->Size = System::Drawing::Size(12, 13);
+			this->label3->TabIndex = 9;
+			this->label3->Text = L"/";
+			// 
+			// fullTime
+			// 
+			this->fullTime->AutoSize = true;
+			this->fullTime->Location = System::Drawing::Point(44, 83);
+			this->fullTime->Name = L"fullTime";
+			this->fullTime->Size = System::Drawing::Size(34, 13);
+			this->fullTime->TabIndex = 10;
+			this->fullTime->Text = L"00:00";
+			// 
+			// nextBtn
+			// 
+			this->nextBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
+			this->nextBtn->Location = System::Drawing::Point(279, 83);
+			this->nextBtn->Name = L"nextBtn";
+			this->nextBtn->Size = System::Drawing::Size(33, 23);
+			this->nextBtn->TabIndex = 11;
+			this->nextBtn->Text = L">|";
+			this->nextBtn->UseVisualStyleBackColor = true;
+			this->nextBtn->Click += gcnew System::EventHandler(this, &MainForm::nextBtn_Click);
+			// 
+			// prevBtn
+			// 
+			this->prevBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
+			this->prevBtn->Location = System::Drawing::Point(240, 83);
+			this->prevBtn->Name = L"prevBtn";
+			this->prevBtn->Size = System::Drawing::Size(33, 23);
+			this->prevBtn->TabIndex = 12;
+			this->prevBtn->Text = L"|<";
+			this->prevBtn->UseVisualStyleBackColor = true;
+			this->prevBtn->Click += gcnew System::EventHandler(this, &MainForm::prevBtn_Click);
+			// 
 			// MainForm
 			// 
 			this->AllowDrop = true;
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(339, 442);
+			this->Controls->Add(this->prevBtn);
+			this->Controls->Add(this->nextBtn);
+			this->Controls->Add(this->fullTime);
+			this->Controls->Add(this->label3);
+			this->Controls->Add(this->currTime);
 			this->Controls->Add(this->stopBtn);
 			this->Controls->Add(this->playPauseBtn);
 			this->Controls->Add(this->trackBar1);
@@ -260,5 +326,13 @@ namespace MP3player {
 	private: System::Void trackBar1_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
 	private: System::Void trackBar1_MouseUp(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
 	private: array<String^>^ plikiZKatalogu(String^ path);
+	
+			 void OnPlayStateChange(int NewState);
+			 void NextSong();
+			 void PrevSong();
+			 ListViewItem^ CurrentItem;
+	private: System::Void nextBtn_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void prevBtn_Click(System::Object^  sender, System::EventArgs^  e);
+			 bool playFlag;
 };
 }
