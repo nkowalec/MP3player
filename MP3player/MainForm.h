@@ -27,8 +27,10 @@ namespace MP3player {
 			
 			timer = gcnew Timer();
 			timer->Tick += gcnew EventHandler(this, &MainForm::Timer_Tick);
+			PlaylistItems = gcnew System::Collections::Generic::List<ToolStripMenuItem^>();
+			PreparePlaylists();
 		}
-
+		System::Collections::Generic::List<ToolStripMenuItem^>^ PlaylistItems;
 	protected:
 		/// <summary>
 		/// Clean up any resources being used.
@@ -60,6 +62,8 @@ namespace MP3player {
 	private: System::Windows::Forms::Label^  fullTime;
 	private: System::Windows::Forms::Button^  nextBtn;
 	private: System::Windows::Forms::Button^  prevBtn;
+	private: System::Windows::Forms::ToolStripMenuItem^  playlistyMenuItem;
+	private: System::Windows::Forms::ToolStripMenuItem^  dodajListêToolStripMenuItem;
 
 	private:
 		/// <summary>
@@ -92,6 +96,8 @@ namespace MP3player {
 			this->fullTime = (gcnew System::Windows::Forms::Label());
 			this->nextBtn = (gcnew System::Windows::Forms::Button());
 			this->prevBtn = (gcnew System::Windows::Forms::Button());
+			this->playlistyMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->dodajListêToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->menuStrip1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->trackBar1))->BeginInit();
 			this->SuspendLayout();
@@ -123,10 +129,10 @@ namespace MP3player {
 			// 
 			// menuStrip1
 			// 
-			this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2)
+			this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(3)
 			{
 				this->plikToolStripMenuItem,
-					this->pomocToolStripMenuItem
+					this->playlistyMenuItem, this->pomocToolStripMenuItem
 			});
 			this->menuStrip1->Location = System::Drawing::Point(0, 0);
 			this->menuStrip1->Name = L"menuStrip1";
@@ -278,6 +284,20 @@ namespace MP3player {
 			this->prevBtn->UseVisualStyleBackColor = true;
 			this->prevBtn->Click += gcnew System::EventHandler(this, &MainForm::prevBtn_Click);
 			// 
+			// playlistyMenuItem
+			// 
+			this->playlistyMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->dodajListêToolStripMenuItem });
+			this->playlistyMenuItem->Name = L"playlistyMenuItem";
+			this->playlistyMenuItem->Size = System::Drawing::Size(62, 20);
+			this->playlistyMenuItem->Text = L"Playlisty";
+			// 
+			// dodajListêToolStripMenuItem
+			// 
+			this->dodajListêToolStripMenuItem->Name = L"dodajListêToolStripMenuItem";
+			this->dodajListêToolStripMenuItem->Size = System::Drawing::Size(152, 22);
+			this->dodajListêToolStripMenuItem->Text = L"Dodaj listê";
+			this->dodajListêToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::dodajListêToolStripMenuItem_Click);
+			// 
 			// MainForm
 			// 
 			this->AllowDrop = true;
@@ -334,5 +354,9 @@ namespace MP3player {
 	private: System::Void nextBtn_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void prevBtn_Click(System::Object^  sender, System::EventArgs^  e);
 			 bool playFlag;
+	private: System::Void dodajListêToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e);
+	private: System::Void PreparePlaylists();
+			 void OnClick(System::Object ^sender, System::EventArgs ^e);
+			 System::Void LoadPlaylist(String^ name);
 };
 }

@@ -1,4 +1,5 @@
 #include "MainForm.h"
+#include "PlaylistNameForm.h"
 
 using namespace System;
 using namespace System::Windows::Forms;
@@ -237,4 +238,91 @@ System::Void MP3player::MainForm::nextBtn_Click(System::Object ^ sender, System:
 System::Void MP3player::MainForm::prevBtn_Click(System::Object ^ sender, System::EventArgs ^ e)
 {
 	PrevSong();
+}
+
+String^ GetPlaylistsDirectory()
+{
+	System::Reflection::Assembly^ ea = System::Reflection::Assembly::GetExecutingAssembly();
+	String^ rootDir = Path::GetDirectoryName(ea->Location);
+	String^ playlistsDir = Path::Combine(rootDir, "Playlists");
+
+	if (!Directory::Exists(playlistsDir))
+		Directory::CreateDirectory(playlistsDir);
+
+	return playlistsDir;
+}
+
+System::Void MP3player::MainForm::PreparePlaylists()
+{
+	for each (ToolStripMenuItem^ item in PlaylistItems)
+	{
+		playlistyMenuItem->DropDownItems->Remove(item);
+	}
+	PlaylistItems->Clear();
+
+	String^ playlistsDir = GetPlaylistsDirectory();
+
+	array<String^>^ files = Directory::GetFiles(playlistsDir);
+	
+	for each (String^ file in files)
+	{
+		ToolStripMenuItem^ item = gcnew ToolStripMenuItem(Path::GetFileName(file));
+		item->Click += gcnew System::EventHandler(this, &MP3player::MainForm::OnClick);
+
+		playlistyMenuItem->DropDownItems->Add(item);
+		PlaylistItems->Add(item);
+		//playlistyMenuItem->DropDownItems->Add()
+	}
+}
+
+System::Void MP3player::MainForm::dodajListêToolStripMenuItem_Click(System::Object ^ sender, System::EventArgs ^ e)
+{
+	PlaylistNameForm^ dialog = gcnew PlaylistNameForm();
+
+	if (dialog->ShowDialog() != System::Windows::Forms::DialogResult::OK)
+		return;
+
+	String^ plName = dialog->GetPlaylistName();
+	String^ path = Path::Combine(GetPlaylistsDirectory(), plName);
+
+	if (File::Exists(path))
+	{
+		MessageBox::Show("Playlista o nazwie \"" + plName + "\" ju¿ istnieje!");
+		return;
+	}
+
+	StreamWriter^ sw = gcnew StreamWriter(path);
+
+	for each (ListViewItem^ item in listView->Items)
+	{
+		sw->WriteLine(item->Name);
+	}
+	sw->Flush();
+	sw->Close();
+
+	PreparePlaylists();
+}
+
+System::Void MP3player::MainForm::LoadPlaylist(String^ name)
+{
+	listView->Items->Clear();
+	String^ dir = GetPlaylistsDirectory();
+	String^ path = Path::Combine(dir, name);
+
+	StreamReader^ sr = gcnew StreamReader(path);
+	System::Collections::Generic::List<String^>^ lista = gcnew System::Collections::Generic::List<String^>();
+	while (sr->Peek() != -1)
+	{
+		String^ linia = sr->ReadLine();
+		lista->Add(linia);
+	}
+	sr->Close();
+	nazwyDoListy(lista->ToArray());
+}
+
+
+void MP3player::MainForm::OnClick(System::Object ^sender, System::EventArgs ^e)
+{
+	ToolStripMenuItem^ item = (ToolStripMenuItem^)sender;
+	LoadPlaylist(item->Text);
 }
