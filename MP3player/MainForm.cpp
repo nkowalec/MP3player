@@ -23,9 +23,17 @@ System::Void MP3player::MainForm::nazwyDoListy(array<String^>^ elementy)
 {
 	for each (String^ item in elementy)
 	{
+		TagLib::File^ tag = TagLib::File::Create(item);
+		TimeSpan^ ts = tag->Properties->Duration;
+
 		ListViewItem^ listItem = gcnew ListViewItem(Path::GetFileName(item));
+		
+		listItem->SubItems->Add(ts->Minutes.ToString()->PadLeft(2, '0') + ":" + ts->Seconds.ToString()->PadLeft(2, '0'));
+
 		listView->Items->Add(listItem);
 		listItem->Name = item;
+		
+		
 	}
 	listView->Refresh();
 }
