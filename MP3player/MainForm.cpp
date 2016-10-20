@@ -1,5 +1,6 @@
 #include "MainForm.h"
 #include "PlaylistNameForm.h"
+#include "InfoItem.h"
 
 using namespace System;
 using namespace System::Windows::Forms;
@@ -318,6 +319,34 @@ System::Void MP3player::MainForm::LoadPlaylist(String^ name)
 	}
 	sr->Close();
 	nazwyDoListy(lista->ToArray());
+}
+
+void MP3player::MainForm::OnTick(System::Object ^ sender, System::EventArgs ^ e)
+{
+	//Zbieranie danych o preferencjach..
+	
+	if (player->playState == WMPLib::WMPPlayState::wmppsPlaying)
+	{
+		String^ path = player->URL;
+		String^ name = Path::GetFileName(path);
+
+		InfoItem^ item = nullptr;
+		for each (InfoItem^ var in InfoItemsList)
+		{
+			if (var->GetName() == name)
+			{
+				item = var;
+				break;
+			}
+		}
+
+		if (item == nullptr)
+			InfoItemsList->Add(item = gcnew InfoItem(name));
+
+		item->AddPath(path);
+		item->Tick();
+	}
+
 }
 
 

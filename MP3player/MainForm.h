@@ -1,4 +1,5 @@
 #pragma once
+#include "InfoItem.h"
 
 namespace MP3player {
 
@@ -8,6 +9,7 @@ namespace MP3player {
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
 	using namespace System::Drawing;
+	
 
 	/// <summary>
 	/// Summary for MainForm
@@ -28,9 +30,17 @@ namespace MP3player {
 			timer = gcnew Timer();
 			timer->Tick += gcnew EventHandler(this, &MainForm::Timer_Tick);
 			PlaylistItems = gcnew System::Collections::Generic::List<ToolStripMenuItem^>();
+			InfoItemsList = gcnew System::Collections::Generic::List<InfoItem^>();
 			PreparePlaylists();
+
+			//Task zbieraj¹cy dane
+			collectData = gcnew Timer();
+			collectData->Interval = 1000;
+			collectData->Tick += gcnew System::EventHandler(this, &MP3player::MainForm::OnTick);
+			collectData->Start();
 		}
 		System::Collections::Generic::List<ToolStripMenuItem^>^ PlaylistItems;
+		System::Collections::Generic::List<InfoItem^>^ InfoItemsList;
 	protected:
 		/// <summary>
 		/// Clean up any resources being used.
@@ -45,6 +55,7 @@ namespace MP3player {
 	private: System::Windows::Forms::TextBox^  nameBox;
 	protected:
 	private: Timer^ timer;
+	private: Timer^ collectData;
 	private: System::Windows::Forms::Label^  label1;
 	private: System::Windows::Forms::MenuStrip^  menuStrip1;
 	private: System::Windows::Forms::ToolStripMenuItem^  plikToolStripMenuItem;
@@ -358,5 +369,6 @@ namespace MP3player {
 	private: System::Void PreparePlaylists();
 			 void OnClick(System::Object ^sender, System::EventArgs ^e);
 			 System::Void LoadPlaylist(String^ name);
+			 void OnTick(System::Object ^sender, System::EventArgs ^e);
 };
 }
