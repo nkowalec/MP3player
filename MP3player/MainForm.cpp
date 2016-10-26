@@ -306,11 +306,11 @@ System::Void MP3player::MainForm::dodajListêToolStripMenuItem_Click(System::Obje
 
 	if (File::Exists(path))
 	{
-		MessageBox::Show("Playlista o nazwie \"" + plName + "\" ju¿ istnieje!");
+		if(MessageBox::Show("Playlista o nazwie \"" + plName + "\" ju¿ istnieje! \nCzy nadpisaæ?", "Konflikt", MessageBoxButtons::YesNo) != System::Windows::Forms::DialogResult::Yes)
 		return;
 	}
 
-	StreamWriter^ sw = gcnew StreamWriter(path);
+	StreamWriter^ sw = gcnew StreamWriter(path, false);
 
 	for each (ListViewItem^ item in listView->Items)
 	{
