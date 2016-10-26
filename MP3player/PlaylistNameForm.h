@@ -23,7 +23,14 @@ namespace MP3player {
 			//
 		}
 
-		String^ GetPlaylistName()
+		PlaylistNameForm(String^ boxname)
+		{
+			InitializeComponent();
+
+			this->Text = boxname;
+		}
+
+		String^ GetResult()
 		{
 			return textBox1->Text;
 		}
@@ -78,9 +85,9 @@ namespace MP3player {
 			this->label1->AutoSize = true;
 			this->label1->Location = System::Drawing::Point(13, 13);
 			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(43, 13);
+			this->label1->Size = System::Drawing::Size(50, 13);
 			this->label1->TabIndex = 1;
-			this->label1->Text = L"Nazwa:";
+			this->label1->Text = L"Wartoœæ:";
 			// 
 			// button1
 			// 

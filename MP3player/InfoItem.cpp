@@ -2,6 +2,16 @@
 using namespace System::IO;
 
 
+InfoItem::InfoItem()
+{
+	
+}
+
+InfoItem::~InfoItem()
+{
+	
+}
+
 InfoItem::InfoItem(String^ fname)
 {
 	Name = fname;

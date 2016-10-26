@@ -253,6 +253,24 @@ String^ GetPlaylistsDirectory()
 	return playlistsDir;
 }
 
+String^ GetAnalizerDirectory()
+{
+	System::Reflection::Assembly^ ea = System::Reflection::Assembly::GetExecutingAssembly();
+	String^ rootDir = Path::GetDirectoryName(ea->Location);
+	String^ analyzerDir = Path::Combine(rootDir, "Analyzer");
+
+	if (!Directory::Exists(analyzerDir))
+		Directory::CreateDirectory(analyzerDir);
+
+	return analyzerDir;
+}
+
+
+Xml::Serialization::XmlSerializer^ GetSerializer(Type^ _type)
+{
+	return gcnew Xml::Serialization::XmlSerializer(_type);
+}
+
 System::Void MP3player::MainForm::PreparePlaylists()
 {
 	for each (ToolStripMenuItem^ item in PlaylistItems)
@@ -283,7 +301,7 @@ System::Void MP3player::MainForm::dodajListêToolStripMenuItem_Click(System::Obje
 	if (dialog->ShowDialog() != System::Windows::Forms::DialogResult::OK)
 		return;
 
-	String^ plName = dialog->GetPlaylistName();
+	String^ plName = dialog->GetResult();
 	String^ path = Path::Combine(GetPlaylistsDirectory(), plName);
 
 	if (File::Exists(path))
@@ -349,9 +367,157 @@ void MP3player::MainForm::OnTick(System::Object ^ sender, System::EventArgs ^ e)
 
 }
 
-
 void MP3player::MainForm::OnClick(System::Object ^sender, System::EventArgs ^e)
 {
 	ToolStripMenuItem^ item = (ToolStripMenuItem^)sender;
 	LoadPlaylist(item->Text);
+}
+
+//Œcie¿ka do aktualnego pliku analizy odtwarzania
+String^ GetAnalizerPath()
+{
+	String^ dir = GetAnalizerDirectory();
+	return Path::Combine(dir, DateTime::Today.ToString("yyyyMM"));
+}
+
+//Tutaj zapisujemy dane, przy niszczeniu obiektu (na koniec dzia³ania programu)
+System::Void MP3player::MainForm::SaveCollectedData()
+{
+	
+	String^ path = GetAnalizerPath();
+	StreamWriter^ writer = gcnew StreamWriter(path, false);
+
+	Xml::Serialization::XmlSerializer^ serializer = GetSerializer(InfoItemsList->GetType());
+
+	serializer->Serialize(writer, InfoItemsList);
+	
+	writer->Close();
+}
+
+//Odczytujemy plik, jeœli takowy istnieje na ten miesi¹c
+System::Void MP3player::MainForm::LoadInfoItemsList()
+{
+	String^ path = GetAnalizerPath();
+
+	if (File::Exists(path))
+	{
+		StreamReader^ reader = gcnew StreamReader(path);
+		
+		Xml::Serialization::XmlSerializer^ serializer = GetSerializer(InfoItemsList->GetType());
+
+		InfoItemsList = (List<InfoItem^>^)serializer->Deserialize(reader);
+
+		reader->Close();
+	}
+}
+
+array<String^>^ MP3player::MainForm::GenerujPlayliste(int _max)
+{
+	List<InfoItem^>^ tmp = gcnew List<InfoItem^>();
+
+	for each (InfoItem^ item in InfoItemsList)
+	{
+		int index = -1;
+		for (int i = 0; i < tmp->Count; i++)
+		{
+			if (tmp[i]->GetPlayTime() < item->GetPlayTime())
+			{
+				index = i;
+				break;
+			}
+		}
+		if (index != -1)
+			tmp->Insert(index, item);
+		else
+			tmp->Add(item);
+	}
+
+	if (tmp->Count < _max)
+	{
+		array<String^>^ analizerFiles = Directory::GetFiles(GetAnalizerDirectory());
+		Array::Sort(analizerFiles);
+		Xml::Serialization::XmlSerializer^ serializer = GetSerializer(tmp->GetType());
+
+		for (int i = analizerFiles->Length - 2; i >= 0; i--)
+		{
+			StreamReader^ sr = gcnew StreamReader(analizerFiles[i]);
+			List<InfoItem^>^ listaFile = (List<InfoItem^>^)serializer->Deserialize(sr);
+
+			for each (InfoItem^ item in listaFile)
+			{
+				bool breakFlag = false;
+				for each (InfoItem^ findItem in tmp)
+				{
+					if (findItem->GetName() == item->GetName())
+					{
+						breakFlag = true;
+						break;
+					}
+				}
+				if (breakFlag) continue;
+
+				int index = -1;
+				for (int i = 0; i < tmp->Count; i++)
+				{
+					if (tmp[i]->GetPlayTime() < item->GetPlayTime())
+					{
+						index = i;
+						break;
+					}
+				}
+				if (index != -1)
+					tmp->Insert(index, item);
+				else
+					tmp->Add(item);
+			}
+
+			sr->Close();
+			if (tmp->Count >= _max)
+				break;
+		}
+	}
+
+	List<String^>^ genPaths = gcnew List<String^>();
+	DateTime^ currFile = DateTime::Today;
+
+	for each (InfoItem^ item in tmp)
+	{
+		genPaths->Add(item->GetPath());
+
+		if (genPaths->Count == _max) break;
+	}
+	return genPaths->ToArray();
+}
+
+System::Void MP3player::MainForm::generujListêUlubionychToolStripMenuItem_Click(System::Object ^ sender, System::EventArgs ^ e)
+{
+	SaveCollectedData();
+	PlaylistNameForm^ form = gcnew PlaylistNameForm("Maksymalna d³ugoœæ playlisty");
+	bool flag = true;
+	while (flag)
+	{
+		if (form->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+		{
+			int max;
+			if (int::TryParse(form->GetResult(), max))
+			{
+				flag = false;
+
+				//Generowanie playlisty
+				array<String^>^ lista = GenerujPlayliste(max);
+				listView->Items->Clear();
+				nazwyDoListy(lista);
+			}
+			else
+			{
+				MessageBox::Show("Wprowadzono b³êdn¹ wartoœæ, maksymalna d³ugoœæ playlisty musi byæ liczb¹ ca³kowit¹!");
+			}
+
+		}
+		else
+		{
+			flag = false;
+		}
+	}
+
 }
