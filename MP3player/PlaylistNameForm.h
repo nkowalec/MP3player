@@ -9,28 +9,27 @@ namespace MP3player {
 	using namespace System::Data;
 	using namespace System::Drawing;
 
-	/// <summary>
-	/// Summary for PlaylistNameForm
-	/// </summary>
-	public ref class PlaylistNameForm : public System::Windows::Forms::Form
+	public ref class GetValueForm : public System::Windows::Forms::Form
 	{
+		/*
+		 * Okienko pozwalaj¹ce na wprowadzanie wartoœci
+		 * wykorzystywane przy wskazywaniu nazwy zapisywanej playlisty
+		 * oraz okreœlania maksymalnej wielkoœci generowanej listy
+	     */
 	public:
-		PlaylistNameForm(void)
+		GetValueForm(void)
 		{
 			InitializeComponent();
-			//
-			//TODO: Add the constructor code here
-			//
 		}
 
-		PlaylistNameForm(String^ boxname)
+		GetValueForm(String^ boxname)	//Ustawia niestandardow¹ nazwê okienka
 		{
 			InitializeComponent();
 
 			this->Text = boxname;
 		}
 
-		String^ GetResult()
+		String^ GetResult()		//Udostêpnia wartoœæ podan¹ w oknie
 		{
 			return textBox1->Text;
 		}
@@ -39,7 +38,7 @@ namespace MP3player {
 		/// <summary>
 		/// Clean up any resources being used.
 		/// </summary>
-		~PlaylistNameForm()
+		~GetValueForm()
 		{
 			if (components)
 			{

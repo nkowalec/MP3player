@@ -10,39 +10,35 @@ namespace MP3player {
 	using namespace System::Data;
 	using namespace System::Drawing;
 	
-
-	/// <summary>
-	/// Summary for MainForm
-	/// </summary>
 	public ref class MainForm : public System::Windows::Forms::Form
 	{
+		/*
+		 * G³ówna klasa programu reprezentuj¹ca jego g³ówne okno.
+		 * Zawiera kompletn¹ funkcjonalnoœæ aplikacji.
+		 */
 	public:
 		MainForm(void)
 		{
 			InitializeComponent();
-			//
-			//TODO: Add the constructor code here
-			//
 
-			player = gcnew WMPLib::WindowsMediaPlayerClass();
+			player = gcnew WMPLib::WindowsMediaPlayerClass();	//Do odtwarzania utworów wykorzystujemy silnik Windows Media Player
+
 			player->PlayStateChange += gcnew WMPLib::_WMPOCXEvents_PlayStateChangeEventHandler(this, &MP3player::MainForm::OnPlayStateChange);
 			
-			timer = gcnew Timer();
+			timer = gcnew Timer();		//Obiekt timera, odœwie¿aj¹cy dane podczas odtwarzania
 			timer->Tick += gcnew EventHandler(this, &MainForm::Timer_Tick);
 			PlaylistItems = gcnew System::Collections::Generic::List<ToolStripMenuItem^>();
 			InfoItemsList = gcnew System::Collections::Generic::List<InfoItem^>();
-			LoadInfoItemsList();
-			PreparePlaylists();
+			LoadInfoItemsList();		//Pobranie aktualnej listy odtwarzanych utworów z ich parametrami
+			PreparePlaylists();		//Dodanie zapisanych playlist do programu
 
-			//Task zbieraj¹cy dane
+			//Timer zbieraj¹cy dane o odtwarzaniu
 			collectData = gcnew Timer();
 			collectData->Interval = 1000;
 			collectData->Tick += gcnew System::EventHandler(this, &MP3player::MainForm::OnTick);
 			collectData->Start();
 		}
 		System::Collections::Generic::List<ToolStripMenuItem^>^ PlaylistItems;
-	private: System::Windows::Forms::ToolStripMenuItem^  generujListêUlubionychToolStripMenuItem;
-	public:
 		System::Collections::Generic::List<InfoItem^>^ InfoItemsList;
 	protected:
 		System::Void LoadInfoItemsList();
@@ -59,8 +55,8 @@ namespace MP3player {
 				delete components;
 			}
 		}
+	private: System::Windows::Forms::ToolStripMenuItem^  generujListêUlubionychToolStripMenuItem;
 	private: System::Windows::Forms::TextBox^  nameBox;
-	protected:
 	private: Timer^ timer;
 	private: Timer^ collectData;
 	private: System::Windows::Forms::Label^  label1;
@@ -84,16 +80,9 @@ namespace MP3player {
 	private: System::Windows::Forms::ToolStripMenuItem^  dodajListêToolStripMenuItem;
 
 	private:
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
 		System::ComponentModel::Container ^components;
 
 #pragma region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
 		void InitializeComponent(void)
 		{
 			this->nameBox = (gcnew System::Windows::Forms::TextBox());
@@ -377,19 +366,19 @@ namespace MP3player {
 	private: System::Void trackBar1_MouseUp(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e);
 	private: array<String^>^ plikiZKatalogu(String^ path);
 	
-			 void OnPlayStateChange(int NewState);
-			 void NextSong();
-			 void PrevSong();
-			 ListViewItem^ CurrentItem;
+	private: void OnPlayStateChange(int NewState);
+	private: void NextSong();
+	private: void PrevSong();
+	private: ListViewItem^ CurrentItem;
 	private: System::Void nextBtn_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void prevBtn_Click(System::Object^  sender, System::EventArgs^  e);
-			 bool playFlag;
+	private: bool playFlag;
 	private: System::Void dodajListêToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void PreparePlaylists();
-			 void OnClick(System::Object ^sender, System::EventArgs ^e);
-			 System::Void LoadPlaylist(String^ name);
-			 void OnTick(System::Object ^sender, System::EventArgs ^e);
+	private: void OnClick(System::Object ^sender, System::EventArgs ^e);
+	private: System::Void LoadPlaylist(String^ name);
+	private: void OnTick(System::Object ^sender, System::EventArgs ^e);
 	private: System::Void generujListêUlubionychToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e);
-			 array<String^>^ GenerujPlayliste(int _max);
+	private: array<String^>^ GenerujPlayliste(int _max);
 };
 }

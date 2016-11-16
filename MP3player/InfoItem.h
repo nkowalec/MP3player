@@ -6,6 +6,12 @@ using namespace System::Collections::Generic;
 #pragma once
 public ref class InfoItem
 {
+	/*
+	 * Klasa obiektów reprezentuj¹cych wyst¹pienie zestawu informacji dotycz¹cych 
+	 * pojedynczego utworu. 
+	 * Przechowuje informacje o wykorzystywanych œcie¿kach 
+	 * czasie odtwarzania ...
+	 */
 	
 public:
 	InfoItem();

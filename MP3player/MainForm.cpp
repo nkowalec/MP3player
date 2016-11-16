@@ -9,11 +9,13 @@ using namespace System::IO;
 
 bool timerFlag = false;
 
+//Otwiera okno wyboru plików
+//po zatwierdzeniu dodaje wybrane utwory do listy
 System::Void MP3player::MainForm::otworzToolStripMenuItem_Click(System::Object ^ sender, System::EventArgs ^ e)
 {
 	OpenFileDialog^ opendialog = gcnew OpenFileDialog;
 	opendialog->Multiselect = true;
-	opendialog->Filter = "MP3 (*.mp3)|*.mp3|All files (*.*)|*.*";
+	opendialog->Filter = "MP3 (*.mp3)|*.mp3|All files (*.*)|*.*";		//Filtrujemy pliki po rozszerzeniu
 	opendialog->ShowDialog();
 
 	nazwyDoListy(opendialog->FileNames);
@@ -21,6 +23,7 @@ System::Void MP3player::MainForm::otworzToolStripMenuItem_Click(System::Object ^
 	delete opendialog;
 }
 
+//Dodaje nazwy utworów do listy odtwarzania
 System::Void MP3player::MainForm::nazwyDoListy(array<String^>^ elementy)
 {
 	for each (String^ item in elementy)
@@ -28,21 +31,24 @@ System::Void MP3player::MainForm::nazwyDoListy(array<String^>^ elementy)
 		TagLib::File^ tag = TagLib::File::Create(item);
 		TimeSpan^ ts = tag->Properties->Duration;
 
-		ListViewItem^ listItem = gcnew ListViewItem(Path::GetFileName(item));
+		ListViewItem^ listItem = gcnew ListViewItem(Path::GetFileName(item));	//Tworzymy obiekt dla listy
 		
+		//Dodajemy do obiektu listy dane z czasem trwania utworu
 		listItem->SubItems->Add(ts->Minutes.ToString()->PadLeft(2, '0') + ":" + ts->Seconds.ToString()->PadLeft(2, '0'));
 
+		//Dodajemy obiekt do naszej listy
 		listView->Items->Add(listItem);
 		listItem->Name = item;
 		
 		
 	}
-	listView->Refresh();
+	listView->Refresh();	//Odœwie¿amy listê po dodaniu obiektów
 }
 
+//Obs³uga metody Drag&Drop
 System::Void MP3player::MainForm::listView_DragDrop(System::Object ^ sender, System::Windows::Forms::DragEventArgs ^ e)
 {
-	array<String^>^ paths = (array<String^>^)e->Data->GetData(DataFormats::FileDrop);
+	array<String^>^ paths = (array<String^>^)e->Data->GetData(DataFormats::FileDrop);		//Dane przeci¹gniête
 	System::Collections::Generic::List<String^>^ lista = gcnew System::Collections::Generic::List<String^>();
 	
 	for each (String^ path in paths)
@@ -50,14 +56,14 @@ System::Void MP3player::MainForm::listView_DragDrop(System::Object ^ sender, Sys
 		FileAttributes^ attr = File::GetAttributes(path);
 		
 		if (!attr->HasFlag(FileAttributes::Directory))
-			lista->Add(path);
+			lista->Add(path);	//Jeœli plik to dodajemy do bufora
 
-		if (attr->HasFlag(FileAttributes::Directory))
+		if (attr->HasFlag(FileAttributes::Directory))		//A jeœli nie to pliki z folderu wrzucamy do bufora
 		{
 			for each (String^ item in plikiZKatalogu(path))
 			{
 				attr = File::GetAttributes(item);
-				if (!attr->HasFlag(FileAttributes::Directory) && item->EndsWith(".mp3"))
+				if (!attr->HasFlag(FileAttributes::Directory) && item->EndsWith(".mp3"))	//Jeœli s¹ to pliki MP3
 					lista->Add(item);
 			}
 		}
@@ -68,11 +74,13 @@ System::Void MP3player::MainForm::listView_DragDrop(System::Object ^ sender, Sys
 	delete lista;
 }
 
+//Jeœli przeci¹gniemy na formê (nie na listê) to zrób to samo co dla listy
 System::Void MP3player::MainForm::MainForm_DragDrop(System::Object ^ sender, System::Windows::Forms::DragEventArgs ^ e)
 {
 	listView_DragDrop(sender, e);
 }
 
+//Ustawienia aktywuj¹ce metodê D&D
 System::Void MP3player::MainForm::listView_DragEnter(System::Object ^ sender, System::Windows::Forms::DragEventArgs ^ e)
 {
 	if (e->Data->GetDataPresent(DataFormats::FileDrop))
@@ -81,9 +89,10 @@ System::Void MP3player::MainForm::listView_DragEnter(System::Object ^ sender, Sy
 		e->Effect = DragDropEffects::None;
 }
 
+//Obs³uga przycisków dla zaznaczonego utworu na liœcie
 System::Void MP3player::MainForm::listView_KeyUp(System::Object ^ sender, System::Windows::Forms::KeyEventArgs ^ e)
 {
-	if (e->KeyCode == Keys::Delete)
+	if (e->KeyCode == Keys::Delete)		//Usuñ z listy
 	{
 		for each (ListViewItem^ item in listView->SelectedItems)
 		{
@@ -92,41 +101,44 @@ System::Void MP3player::MainForm::listView_KeyUp(System::Object ^ sender, System
 
 		listView->Refresh();
 	}
-	else if(e->KeyCode == Keys::Enter)
+	else if(e->KeyCode == Keys::Enter)		//Odtwórz utwór
 	{
 		listView_DoubleClick(sender, e);
 	}
 }
 
+//Opcja z menu plik (zamyka aplikacjê)
 System::Void MP3player::MainForm::wyjœcieToolStripMenuItem_Click(System::Object ^ sender, System::EventArgs ^ e)
 {
 	Application::Exit();
 }
 
+//Obs³uguje rozpoczêcie odtworzenia utworu przy podwójnym klikniêciu
 System::Void MP3player::MainForm::listView_DoubleClick(System::Object ^ sender, System::EventArgs ^ e)
 {
-	nameBox->Text = Path::GetFileName(listView->SelectedItems[0]->Text);
+	nameBox->Text = Path::GetFileName(listView->SelectedItems[0]->Text);	//Pobierz œcie¿kê utworu
 	String^ filePath = listView->SelectedItems[0]->Name;
 	CurrentItem = listView->SelectedItems[0];
 	
-	player->URL = filePath;
-	if(!timerFlag) { timer->Start(); timerFlag = true; }
-	player->play();
+	player->URL = filePath;		//Wskazanie pliku dla silnika muzycznego
+	if(!timerFlag) { timer->Start(); timerFlag = true; }		//Obs³uga Timera
+	player->play();		//I odtwarzamy
 	playPauseBtn->Text = "Pause";
 }
 
+//Akcja wykonywana dla cyklu timera
 System::Void MP3player::MainForm::Timer_Tick(System::Object ^ sender, System::EventArgs ^ e)
 {
 	double percent = 0;
 	
-	if (playFlag)
+	if (playFlag)		//Obs³uga odtwarzania kolejnego utworu (po zakoñczeniu poprzedniego z listy)
 	{		
 		player->controls->play();
 		playFlag = false;
 	}
 
 	if (player->controls->currentPosition > 0 && player->controls->currentItem->duration > 0)
-	{
+	{		//Ustawienie suwaka postêpu odtwarzania oraz ustawienie pól informacyjnych o czasie odtwarzania
 		currTime->Text = player->controls->currentPositionString;
 		fullTime->Text = player->currentItem->durationString;
 		percent = ((double)player->controls->currentPosition / player->controls->currentItem->duration);
@@ -135,6 +147,7 @@ System::Void MP3player::MainForm::Timer_Tick(System::Object ^ sender, System::Ev
 	}
 }
 
+//Obs³uga przycisku Play/Pause
 System::Void MP3player::MainForm::playPauseBtn_Click(System::Object ^ sender, System::EventArgs ^ e)
 {
 	if (playPauseBtn->Text == "Play")
@@ -150,6 +163,7 @@ System::Void MP3player::MainForm::playPauseBtn_Click(System::Object ^ sender, Sy
 	}
 }
 
+//Obs³uga przycisku Stop
 System::Void MP3player::MainForm::stopBtn_Click(System::Object ^ sender, System::EventArgs ^ e)
 {
 	playPauseBtn->Text = "Play";
@@ -160,12 +174,14 @@ System::Void MP3player::MainForm::stopBtn_Click(System::Object ^ sender, System:
 	currTime->Text = "00:00";
 }
 
+//Obs³uga przesuwania suwaka postêpu odtwarzania (przy przesuwaniu)
 System::Void MP3player::MainForm::trackBar1_MouseDown(System::Object ^ sender, System::Windows::Forms::MouseEventArgs ^ e)
 {
-	timer->Stop();
+	timer->Stop();	
 	timerFlag = false;
 }
 
+//Po zakoñczeniu przesuwania suwaka, (przestaw utwór, uruchom ponownie Timer)
 System::Void MP3player::MainForm::trackBar1_MouseUp(System::Object ^ sender, System::Windows::Forms::MouseEventArgs ^ e)
 {
 	double percent = (double)trackBar1->Value / trackBar1->Maximum;
@@ -174,12 +190,14 @@ System::Void MP3player::MainForm::trackBar1_MouseUp(System::Object ^ sender, Sys
 	if(!timerFlag) { timer->Start(); timerFlag = true; }
 }
 
+//Pobieranie œcie¿ek plików z katalogu
 array<String^>^ MP3player::MainForm::plikiZKatalogu(String ^ path)
 {
 	array<String^>^ files = Directory::GetFiles(path);
 	return files;
 }
 
+//Obs³uga zdarzenia zakoñczenia utworu
 void MP3player::MainForm::OnPlayStateChange(int NewState)
 {
 	if (NewState == (int)WMPLib::WMPPlayState::wmppsMediaEnded)
@@ -190,10 +208,11 @@ void MP3player::MainForm::OnPlayStateChange(int NewState)
 	}
 }
 
+//Obs³uga przejœcia do nastêpnego utworu
 void MP3player::MainForm::NextSong()
 {
 	int nextIndex = CurrentItem->Index + 1;
-	if (listView->Items->Count - 1 >= nextIndex)
+	if (listView->Items->Count - 1 >= nextIndex)		//Jeœli jest nastêpny
 	{
 		for each (ListViewItem^ item in listView->SelectedItems)
 		{
@@ -206,10 +225,11 @@ void MP3player::MainForm::NextSong()
 	}
 	else
 	{
-		stopBtn_Click(this, EventArgs::Empty);
+		stopBtn_Click(this, EventArgs::Empty);		//A jeœli jest ju¿ koniec listy
 	}
 }
 
+//Obs³uga przejœcia do poprzedniego utworu
 void MP3player::MainForm::PrevSong()
 {
 	int prevIndex = CurrentItem->Index - 1;
@@ -231,16 +251,19 @@ void MP3player::MainForm::PrevSong()
 	}
 }
 
+//Przycisk nastêpnego utworu
 System::Void MP3player::MainForm::nextBtn_Click(System::Object ^ sender, System::EventArgs ^ e)
 {
 	NextSong();
 }
 
+//Przycisk poprzedniego utworu
 System::Void MP3player::MainForm::prevBtn_Click(System::Object ^ sender, System::EventArgs ^ e)
 {
 	PrevSong();
 }
 
+//Pobierz œcie¿kê katalogu z playlistami
 String^ GetPlaylistsDirectory()
 {
 	System::Reflection::Assembly^ ea = System::Reflection::Assembly::GetExecutingAssembly();
@@ -253,6 +276,7 @@ String^ GetPlaylistsDirectory()
 	return playlistsDir;
 }
 
+//Pobierz œcie¿kê katalogu z danymi analizy odtwarzania
 String^ GetAnalizerDirectory()
 {
 	System::Reflection::Assembly^ ea = System::Reflection::Assembly::GetExecutingAssembly();
@@ -265,38 +289,41 @@ String^ GetAnalizerDirectory()
 	return analyzerDir;
 }
 
-
+//Udostêpnia serializer dla tworzenia plików XML
 Xml::Serialization::XmlSerializer^ GetSerializer(Type^ _type)
 {
 	return gcnew Xml::Serialization::XmlSerializer(_type);
 }
 
+//Pobiera dostêpne playlisty i dodaje do interfejsu programu
 System::Void MP3player::MainForm::PreparePlaylists()
 {
-	for each (ToolStripMenuItem^ item in PlaylistItems)
+	for each (ToolStripMenuItem^ item in PlaylistItems)		//Wyczyœæ listê
 	{
 		playlistyMenuItem->DropDownItems->Remove(item);
 	}
 	PlaylistItems->Clear();
 
-	String^ playlistsDir = GetPlaylistsDirectory();
-
+	String^ playlistsDir = GetPlaylistsDirectory();		
+	//Pobierz zapisane playlisty
 	array<String^>^ files = Directory::GetFiles(playlistsDir);
 	
 	for each (String^ file in files)
 	{
+		//Dodaj elementy i akcje
 		ToolStripMenuItem^ item = gcnew ToolStripMenuItem(Path::GetFileName(file));
 		item->Click += gcnew System::EventHandler(this, &MP3player::MainForm::OnClick);
 
 		playlistyMenuItem->DropDownItems->Add(item);
 		PlaylistItems->Add(item);
-		//playlistyMenuItem->DropDownItems->Add()
 	}
 }
 
+//Obs³uga zapisu nowej playlisty
+// -- Zapisuje playlistê z aktualnej listy
 System::Void MP3player::MainForm::dodajListêToolStripMenuItem_Click(System::Object ^ sender, System::EventArgs ^ e)
 {
-	PlaylistNameForm^ dialog = gcnew PlaylistNameForm();
+	GetValueForm^ dialog = gcnew GetValueForm();
 
 	if (dialog->ShowDialog() != System::Windows::Forms::DialogResult::OK)
 		return;
@@ -322,6 +349,7 @@ System::Void MP3player::MainForm::dodajListêToolStripMenuItem_Click(System::Obje
 	PreparePlaylists();
 }
 
+//£aduje wskazan¹ (po nazwie) playlistê do list teraz odtwarzanych
 System::Void MP3player::MainForm::LoadPlaylist(String^ name)
 {
 	listView->Items->Clear();
@@ -339,11 +367,12 @@ System::Void MP3player::MainForm::LoadPlaylist(String^ name)
 	nazwyDoListy(lista->ToArray());
 }
 
+//Akcja dla cyklu zegarowego timera zbieraj¹cego dane
 void MP3player::MainForm::OnTick(System::Object ^ sender, System::EventArgs ^ e)
 {
 	//Zbieranie danych o preferencjach..
 	
-	if (player->playState == WMPLib::WMPPlayState::wmppsPlaying)
+	if (player->playState == WMPLib::WMPPlayState::wmppsPlaying)	//Zbiera jeœli coœ jest odtwarzane
 	{
 		String^ path = player->URL;
 		String^ name = Path::GetFileName(path);
@@ -367,6 +396,7 @@ void MP3player::MainForm::OnTick(System::Object ^ sender, System::EventArgs ^ e)
 
 }
 
+//Akcja dla klikniêcia playlisty w menu
 void MP3player::MainForm::OnClick(System::Object ^sender, System::EventArgs ^e)
 {
 	ToolStripMenuItem^ item = (ToolStripMenuItem^)sender;
@@ -411,6 +441,8 @@ System::Void MP3player::MainForm::LoadInfoItemsList()
 	}
 }
 
+//Metoda generuj¹ca playlistê na podstawie zebranych danych
+//Ogranicza iloœæ utworów do przekazanej parametrem (jeœli jest dostêpnych wiêcej)
 array<String^>^ MP3player::MainForm::GenerujPlayliste(int _max)
 {
 	List<InfoItem^>^ tmp = gcnew List<InfoItem^>();
@@ -489,10 +521,12 @@ array<String^>^ MP3player::MainForm::GenerujPlayliste(int _max)
 	return genPaths->ToArray();
 }
 
+//Obs³uga opcji wybranej w menu
+//Pobranie informacji o maksymalnej d³ugoœci playlisty oraz uruchomienie generatora
 System::Void MP3player::MainForm::generujListêUlubionychToolStripMenuItem_Click(System::Object ^ sender, System::EventArgs ^ e)
 {
 	SaveCollectedData();
-	PlaylistNameForm^ form = gcnew PlaylistNameForm("Maksymalna d³ugoœæ playlisty");
+	GetValueForm^ form = gcnew GetValueForm("Maksymalna d³ugoœæ playlisty");
 	bool flag = true;
 	while (flag)
 	{
